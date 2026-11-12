@@ -5,8 +5,18 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-const currency = new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" });
+// Amounts are stored and entered as whole Vietnamese đồng.
+const currency = new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" });
 export const formatMoney = (n: number) => currency.format(n);
+
+/** Text typed into a money field -> whole-đồng digits grouped with dots ("1234567" -> "1.234.567"). */
+export function formatMoneyInput(raw: string) {
+  const digits = raw.replace(/\D/g, "").replace(/^0+(?=\d)/, "");
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+/** Money field text -> whole đồng; empty means 0. */
+export const parseMoneyInput = (text: string) => Number(text.replace(/\D/g, "")) || 0;
 
 export const formatKm = (n: number) => `${n.toLocaleString(undefined, { maximumFractionDigits: 1 })} km`;
 

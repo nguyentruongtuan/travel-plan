@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api, type Location, type PlanItem } from "@/lib/api";
-import { fromLocalInput, toLocalInput } from "@/lib/utils";
+import { formatMoneyInput, fromLocalInput, parseMoneyInput, toLocalInput } from "@/lib/utils";
 
 export function ItemFormDialog({
   open,
@@ -39,7 +39,7 @@ export function ItemFormDialog({
     setName(item?.name ?? "");
     setPlanned(toLocalInput(item?.planned_stop_time));
     setStopped(toLocalInput(item?.stopped_time));
-    setSpent(String(item?.spent_money ?? 0));
+    setSpent(formatMoneyInput(String(Math.round(item?.spent_money ?? 0))));
     setPhotoUrl(item?.photo_url ?? null);
     setLocation(item?.location ?? null);
     setAddress(item?.location.address ?? "");
@@ -79,7 +79,7 @@ export function ItemFormDialog({
         name: name.trim(),
         planned_stop_time: fromLocalInput(planned),
         stopped_time: fromLocalInput(stopped),
-        spent_money: Number(spent) || 0,
+        spent_money: parseMoneyInput(spent),
         photo_url: photoUrl,
         location: { lat: latN, lng: lngN, address: address.trim() || null },
       };
@@ -162,16 +162,21 @@ export function ItemFormDialog({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="item-spent">Money spent</Label>
-            <Input
-              id="item-spent"
-              type="number"
-              inputMode="decimal"
-              min={0}
-              step="0.01"
-              value={spent}
-              onChange={(e) => setSpent(e.target.value)}
-            />
+            <Label htmlFor="item-spent">Money spent (VND)</Label>
+            <div className="relative">
+              <Input
+                id="item-spent"
+                inputMode="numeric"
+                autoComplete="off"
+                placeholder="0"
+                className="pr-8"
+                value={spent}
+                onChange={(e) => setSpent(formatMoneyInput(e.target.value))}
+              />
+              <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-muted-foreground">
+                ₫
+              </span>
+            </div>
           </div>
 
           <div className="grid gap-2">
